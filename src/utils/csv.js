@@ -3,10 +3,20 @@ import { stringify } from 'csv-stringify/sync';
 
 export function parseCSV(fileBuffer) {
   try {
-    const records = parse(fileBuffer, {
+    const text = fileBuffer.toString('utf-8');
+    const firstLine = text.split('\n')[0];
+
+    // Detect delimiter
+    let delimiter = ',';
+    if (firstLine.includes(';')) delimiter = ';';
+    else if (firstLine.includes('\t')) delimiter = '\t';
+
+    const records = parse(text, {
       columns: true,
       skip_empty_lines: true,
       trim: true,
+      delimiter: delimiter,
+      relax_column_count: true,
     });
     return { success: true, records };
   } catch (err) {
