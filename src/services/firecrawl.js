@@ -11,9 +11,7 @@ export async function scrapeURL(url) {
       },
       body: JSON.stringify({
         url: url,
-        pageOptions: {
-          onlyMainContent: true,
-        },
+        formats: ['markdown'],
       }),
     });
 
