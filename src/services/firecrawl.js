@@ -23,8 +23,8 @@ export async function scrapeURL(url) {
     const data = await response.json();
     return {
       success: true,
-      markdown: data.markdown || data.content || '',
-      url: data.url,
+      markdown: data.data?.markdown || data.markdown || data.content || '',
+      url: data.data?.metadata?.url || data.url,
     };
   } catch (err) {
     return {

@@ -50,7 +50,8 @@ Return ONLY a valid JSON object with these exact keys and short answers. Be conc
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`DeepSeek error: ${error.error?.message || response.statusText}`);
+      console.error('DeepSeek error response:', JSON.stringify(error));
+      throw new Error(`DeepSeek error: ${error.error?.message || error.message || response.statusText}`);
     }
 
     const data = await response.json();

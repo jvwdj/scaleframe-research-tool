@@ -113,6 +113,13 @@ async function processRow(row, jobId, variables, urlColumn) {
       throw new Error(`Scrape failed: ${scrapeResult.error}`);
     }
 
+    const mdLength = scrapeResult.markdown?.length || 0;
+    console.log(`  📄 Got ${mdLength} bytes of markdown`);
+
+    if (mdLength < 100) {
+      throw new Error(`Scraped content too small (${mdLength} bytes) - possibly blocked or empty page`);
+    }
+
     // Extract variables
     console.log(`  🤖 Extracting with DeepSeek...`);
     const extractResult = await extractVariables(scrapeResult.markdown, variables, inputData);
