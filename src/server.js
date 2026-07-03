@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { initDB } from './db/database.js';
 import { authMiddleware } from './middleware/auth.js';
 import jobRoutes from './routes/jobs.js';
+import { startProcessor } from './services/processor.js';
 
 dotenv.config();
 
@@ -40,6 +41,9 @@ async function start() {
   try {
     await initDB();
     console.log('✓ Database initialized');
+
+    // Start background job processor
+    startProcessor();
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on port ${PORT}`);

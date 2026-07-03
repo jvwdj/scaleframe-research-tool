@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { getDB, run, get, all } from '../db/database.js';
-import { parseCSV, validateCSVStructure } from '../utils/csv.js';
+import { parseCSV, validateCSVStructure, enrichCSV } from '../utils/csv.js';
 import { generateJobId } from '../utils/job.js';
 
 const router = express.Router();
@@ -141,8 +141,25 @@ router.get('/:job_id/usage', async (req, res) => {
 // GET /jobs/:job_id/export - Export enriched CSV
 router.get('/:job_id/export', async (req, res) => {
   try {
-    // TODO: Implement CSV export
-    res.status(501).json({ error: 'Not implemented yet' });
+    const { job_id } = req.params;
+    const job = await get('SELECT * FROM jobs WHERE id = ?', [job_id]);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    const variables = JSON.parse(job.variables_json);
+    const rows = await all('SELECT * FROM rows WHERE job_id = ? ORDER BY row_index', [job_id]);
+
+    // Reconstruct original data
+    const originalRecords = rows.map(r => JSON.parse(r.input_json));
+
+    // Enrich with results
+    const enrichedCSV = enrichCSV(originalRecords, rows, variables);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="enriched_${job_id}.csv"`);
+    res.send(enrichedCSV);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
