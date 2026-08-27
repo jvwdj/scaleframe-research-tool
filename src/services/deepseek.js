@@ -24,6 +24,7 @@ ${markdown}
 Extract the following information from this website:
 ${variablePrompts}
 
+IMPORTANT: For yes/no questions, respond with exactly "Yes" or "No" (not 1/0, true/false, or yes/no in lowercase).
 Return ONLY a valid JSON object with these exact keys and short answers. Be concise.`;
 
   try {
