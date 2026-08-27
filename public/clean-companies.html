@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Name Cleaner - Research Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      position: relative;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      font-size: 24px;
+      cursor: pointer;
+      text-decoration: none;
+      color: #37352f;
+      transition: opacity 0.2s;
+    }
+
+    .back-btn:hover {
+      opacity: 0.6;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #37352f;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .section {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-section {
+      flex: 0 0 400px;
+      min-width: 0;
+    }
+
+    .history-section {
+      flex: 0 0 300px;
+      min-width: 0;
+      overflow: auto;
+    }
+
+    .results-section {
+      flex: 1;
+      min-width: 0;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #37352f;
+      margin-bottom: 8px;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    input[type="file"]:disabled,
+    input[type="text"]:disabled,
+    textarea:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .file-info {
+      margin: 8px 0 0 0;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .info-text {
+      font-size: 12px;
+      color: #999;
+      margin: 0;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: #396afc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s ease;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .button-group button {
+      flex: 1;
+    }
+
+    .cancel-btn {
+      background: #c5221f;
+    }
+
+    .download-btn {
+      background: #e6f4ea;
+      color: #1e7e34;
+      border: 1px solid #ceead6;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .results-header h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #37352f;
+    }
+
+    .history-header h2 {
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #37352f;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: #999;
+      margin: 0;
+    }
+
+    .progress-container {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #396afc;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: #fafafa;
+      border-bottom: 1px solid #e8e8e8;
+      position: sticky;
+      top: 0;
+    }
+
+    th {
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+      color: #37352f;
+    }
+
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #666;
+    }
+
+    td:first-child {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    td:nth-child(2) {
+      color: #37352f;
+      font-weight: 500;
+    }
+
+    .notification {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      border: 1px solid;
+      display: none;
+    }
+
+    .notification.show {
+      display: block;
+    }
+
+    .notification.success {
+      background: #e6f4ea;
+      color: #1e7e34;
+      border-color: #ceead6;
+    }
+
+    .notification.error {
+      background: #fce8e6;
+      color: #c5221f;
+      border-color: #f5c6c2;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .results-container {
+      flex: 1;
+      overflow: auto;
+    }
+
+    .job-item {
+      padding: 12px;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      background: #fafafa;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .job-item:hover {
+      background: #f0f0f0;
+      border-color: #396afc;
+    }
+
+    .job-item.active {
+      background: #e3f2fd;
+      border-color: #396afc;
+    }
+
+    .job-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #37352f;
+      margin-bottom: 4px;
+    }
+
+    .job-date {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 4px;
+    }
+
+    .job-status {
+      font-size: 11px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="notification" class="notification"></div>
+
+  <div class="header">
+    <a href="/" class="back-btn">←</a>
+    <div style="padding-left: 56px;">
+      <h1>Company Name Cleaner</h1>
+      <p>Clean company names with AI</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Form Section -->
+    <div class="section form-section">
+      <form id="uploadForm">
+        <div>
+          <label for="csvFile">CSV File</label>
+          <input type="file" id="csvFile" accept=".csv" required>
+          <p class="file-info" id="fileName"></p>
+        </div>
+
+        <div>
+          <label for="systemPrompt">System Prompt</label>
+          <textarea id="systemPrompt" placeholder="Enter the system prompt for company name cleaning...">You are an expert at cleaning company names to extract the core brand name only.
+
+PRIORITY RULES (in order):
+1. Extract the BRAND NAME - usually the first 1-2 words
+2. Remove GENERIC DESCRIPTORS that follow the brand:
+   - Service types: Consulting, Services, Support, Agency, Bureau, Staffing
+   - Product types: Software, Solutions, Platform, Tools, Application, System
+   - Business entity: BV, AG, B.V., Ltd, Inc, LLC, Development, Management
+   - Industry/Process: Automatisering, Horeca, Commerce, Finance, Digital
+   - Other: Data, Technologies, Systems, Online (unless part of brand name)
+
+3. Keep multi-word BRAND NAMES if both words are clearly brand identity:
+   - "Informer Online" → "Informer Online" (both are brand)
+   - "BlueBear Data" → "BlueBear" (Data is generic, not brand)
+
+EXAMPLES:
+- "LPCS | License Partners Cloud Solutions B.V." → "LCPS"
+- "SMRTR Consulting BV" → "SMRTR"
+- "Altronic Automatisering BV" → "Altronic"
+- "Prodist ERP Software" → "Prodist"
+- "Informer Online Nederland B.V." → "Informer Online"
+- "Sifters process performance & audit support" → "Sifters"
+
+CRITICAL RULES:
+- Return ONLY the cleaned brand name. Nothing else.
+- Do NOT explain, ask questions, or provide context.
+- If you cannot determine a brand name, return the first 1-2 words as-is.
+- Output must be exactly one line with just the company name.</textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" id="submitBtn">Clean Companies</button>
+          <button type="button" id="cancelBtn" class="cancel-btn" style="display: none;">Stop</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- History Section -->
+    <div class="section history-section">
+      <div class="history-header">
+        <h2>Job History</h2>
+      </div>
+      <div id="jobHistory" style="flex: 1; overflow: auto;"></div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="section results-section">
+      <div class="results-header">
+        <h2 id="resultsTitle">Results</h2>
+        <button class="download-btn" id="downloadBtn" style="display: none;">↓ Download CSV</button>
+      </div>
+
+      <div class="results-container">
+        <p class="empty-state">Upload a CSV to see results here</p>
+
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-info">
+            <span id="progressText">0%</span>
+            <span id="progressCount">0 / 0</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div id="resultsTable" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('csvFile');
+    const systemPromptEl = document.getElementById('systemPrompt');
+    const fileNameEl = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resultsContainer = document.querySelector('.results-container');
+    const resultsTitle = document.getElementById('resultsTitle');
+    const resultsTable = document.getElementById('resultsTable');
+    const notificationEl = document.getElementById('notification');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressCount = document.getElementById('progressCount');
+    const jobHistoryEl = document.getElementById('jobHistory');
+
+    let enrichedRecords = [];
+    let currentJobId = null;
+    let abortController = null;
+    let jobs = [];
+
+    fileInput.addEventListener('change', (e) => {
+      if (fileInput.files?.[0]) {
+        fileNameEl.textContent = fileInput.files[0].name;
+      }
+    });
+
+    function showNotification(message, type = 'success') {
+      notificationEl.textContent = message;
+      notificationEl.className = `notification show ${type}`;
+      setTimeout(() => {
+        notificationEl.classList.remove('show');
+      }, 4000);
+    }
+
+    function saveJob(jobData) {
+      jobs.unshift({
+        id: Date.now(),
+        fileName: fileInput.files[0]?.name,
+        systemPrompt: systemPromptEl.value.substring(0, 50) + '...',
+        rowCount: enrichedRecords.length,
+        timestamp: new Date().toLocaleString(),
+        data: enrichedRecords
+      });
+      renderJobHistory();
+      localStorage.setItem('companiesJobs', JSON.stringify(jobs.slice(0, 10)));
+    }
+
+    function renderJobHistory() {
+      if (jobs.length === 0) {
+        jobHistoryEl.innerHTML = '<p class="empty-state">No jobs yet</p>';
+        return;
+      }
+
+      jobHistoryEl.innerHTML = jobs.map(job => `
+        <div class="job-item" onclick="loadJob(${job.id})">
+          <div class="job-name">${job.fileName || 'Untitled'}</div>
+          <div class="job-date">${job.timestamp}</div>
+          <div class="job-status">${job.rowCount} rows processed</div>
+        </div>
+      `).join('');
+    }
+
+    window.loadJob = function(jobId) {
+      const job = jobs.find(j => j.id === jobId);
+      if (job) {
+        enrichedRecords = job.data;
+        renderResults();
+      }
+    };
+
+    function loadJobHistory() {
+      const saved = localStorage.getItem('companiesJobs');
+      if (saved) {
+        jobs = JSON.parse(saved);
+        renderJobHistory();
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const file = fileInput.files?.[0];
+      if (!file) {
+        showNotification('Please select a CSV file', 'error');
+        return;
+      }
+
+      abortController = new AbortController();
+      submitBtn.disabled = true;
+      cancelBtn.style.display = 'block';
+      enrichedRecords = [];
+      progressContainer.style.display = 'block';
+      resultsTable.style.display = 'none';
+      downloadBtn.style.display = 'none';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('systemPrompt', systemPromptEl.value);
+
+        const response = await fetch('/api/clean-companies', {
+          method: 'POST',
+          headers: {
+            'X-API-Key': 'test-key-123',
+          },
+          body: formData,
+          signal: abortController.signal,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          showNotification(error.error || 'Failed to clean companies', 'error');
+          submitBtn.disabled = false;
+          cancelBtn.style.display = 'none';
+          progressContainer.style.display = 'none';
+          return;
+        }
+
+        currentJobId = response.headers.get('X-Job-ID');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (!line) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'progress') {
+                progressFill.style.width = `${data.progress}%`;
+                progressText.textContent = `${data.progress}%`;
+                progressCount.textContent = `${data.processed} / ${data.total}`;
+                if (data.records) {
+                  enrichedRecords = data.records;
+                }
+              } else if (data.type === 'complete') {
+                enrichedRecords = data.records;
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+                progressCount.textContent = `${data.total} / ${data.total}`;
+                renderResults();
+                saveJob(data);
+                showNotification('Companies cleaned successfully!', 'success');
+              } else if (data.type === 'cancelled') {
+                showNotification('Cleaning cancelled', 'error');
+              }
+            } catch (e) {
+              // Ignore parse errors
+            }
+          }
+        }
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error:', error);
+          showNotification('Error cleaning companies', 'error');
+        }
+      } finally {
+        submitBtn.disabled = false;
+        cancelBtn.style.display = 'none';
+        currentJobId = null;
+      }
+    });
+
+    cancelBtn.addEventListener('click', async () => {
+      if (abortController) {
+        abortController.abort();
+      }
+
+      if (currentJobId) {
+        try {
+          await fetch(`/api/clean-companies/cancel/${currentJobId}`, {
+            method: 'POST',
+            headers: { 'X-API-Key': 'test-key-123' },
+          });
+        } catch (err) {
+          console.error('Error cancelling job:', err);
+        }
+      }
+
+      progressContainer.style.display = 'none';
+      submitBtn.disabled = false;
+      cancelBtn.style.display = 'none';
+
+      if (enrichedRecords.length > 0) {
+        renderResults();
+        saveJob({});
+        showNotification(`Stopped. ${enrichedRecords.length} records processed.`, 'error');
+      } else {
+        showNotification('Cancelled without results', 'error');
+      }
+    });
+
+    function renderResults() {
+      if (enrichedRecords.length === 0) {
+        resultsContainer.innerHTML = '<p class="empty-state">No results yet</p>';
+        return;
+      }
+
+      resultsTitle.textContent = `Results (${enrichedRecords.length})`;
+      downloadBtn.style.display = 'block';
+      progressContainer.style.display = 'none';
+
+      const columns = Object.keys(enrichedRecords[0]);
+      const cleanCol = 'company_name_clean';
+
+      if (!columns.includes(cleanCol)) {
+        resultsContainer.innerHTML = '<p class="empty-state">No results yet</p>';
+        return;
+      }
+
+      // Find the company column - look for exact match first
+      const companyCol = columns.find(c => c === 'Company Name' || c === 'Company name') ||
+                        columns.find(c => c.toLowerCase() === 'company name') ||
+                        columns.find(c => c.toLowerCase().includes('company')) ||
+                        columns.find(c => !c.endsWith('_clean'))[0];
+
+      const html = `
+        <table>
+          <thead>
+            <tr>
+              <th>Company Name</th>
+              <th>company_name_clean</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${enrichedRecords.map(record => `
+              <tr>
+                <td title="${record[companyCol] || ''}">${record[companyCol] || '-'}</td>
+                <td>${record[cleanCol] || '-'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      resultsTable.innerHTML = html;
+      resultsTable.style.display = 'block';
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (enrichedRecords.length === 0) return;
+
+      const columns = Object.keys(enrichedRecords[0]);
+      const header = columns.map(col => `"${col.replace(/"/g, '""')}"`).join(',');
+      const rows = enrichedRecords.map(record =>
+        columns.map(col => {
+          const value = record[col] || '';
+          return `"${String(value).replace(/"/g, '""')}"`;
+        }).join(',')
+      );
+
+      const csv = [header, ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'cleaned-companies.csv';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    });
+
+    loadJobHistory();
+  </script>
+</body>
+</html>

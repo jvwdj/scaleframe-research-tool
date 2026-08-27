@@ -6,7 +6,7 @@ export function authMiddleware(req, res, next) {
   }
 
   // Parse API keys from env
-  const keysEnv = process.env.RONNIE_API_KEYS || '';
+  const keysEnv = process.env.RESEARCH_TOOL_API_KEYS || '';
   const keyMap = {};
   keysEnv.split(',').forEach(pair => {
     const [name, key] = pair.split(':').map(s => s.trim());

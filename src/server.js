@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url';
 import { initDB } from './db/database.js';
 import { authMiddleware } from './middleware/auth.js';
 import jobRoutes from './routes/jobs.js';
+import cleanTitlesRoutes from './routes/clean-titles.js';
+import cleanCompaniesRoutes from './routes/clean-companies.js';
 import { startProcessor } from './services/processor.js';
 
 dotenv.config();
@@ -16,17 +18,20 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Auth middleware for all routes except health
-app.use(authMiddleware);
+// Auth middleware disabled for internal use
+// app.use(authMiddleware);
 
 // Routes
 app.use('/jobs', jobRoutes);
+app.use('/api/clean-titles', cleanTitlesRoutes);
+app.use('/api/clean-companies', cleanCompaniesRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {
