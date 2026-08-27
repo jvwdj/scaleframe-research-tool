@@ -1,5 +1,5 @@
 import sqlite3 from 'sqlite3';
-import { readFileSync } from 'fs';
+import { readFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,6 +14,14 @@ export function getDB() {
 export async function initDB() {
   return new Promise((resolve, reject) => {
     const dbPath = process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'ronnie.db');
+    const dbDir = path.dirname(dbPath);
+
+    // Ensure directory exists
+    try {
+      mkdirSync(dbDir, { recursive: true });
+    } catch (err) {
+      return reject(err);
+    }
 
     db = new sqlite3.Database(dbPath, (err) => {
       if (err) return reject(err);
