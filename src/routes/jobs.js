@@ -36,14 +36,6 @@ router.post('/', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'variables must be a non-empty array' });
     }
 
-    // Transform string questions to {name, description} format
-    parsedVariables = parsedVariables.map((v, i) => {
-      if (typeof v === 'string') {
-        return { name: v, description: v };
-      }
-      return v;
-    });
-
     // Parse CSV
     const parseResult = parseCSV(req.file.buffer);
     if (!parseResult.success) {
