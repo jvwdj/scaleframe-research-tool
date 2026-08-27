@@ -70,11 +70,11 @@ export function enrichCSV(records, results, variables) {
     if (rowResult && rowResult.output_json) {
       const extracted = JSON.parse(rowResult.output_json);
       variables.forEach(v => {
-        enrichedRow[v.name] = extracted[v.name] || null;
+        enrichedRow[v.description] = extracted[v.name] || null;
       });
     } else {
       variables.forEach(v => {
-        enrichedRow[v.name] = null;
+        enrichedRow[v.description] = null;
       });
     }
 

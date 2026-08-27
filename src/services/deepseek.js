@@ -63,7 +63,17 @@ Return ONLY a valid JSON object with these exact keys and short answers. Be conc
     }
 
     // Parse the JSON response
-    const extracted = JSON.parse(content);
+    let extracted = JSON.parse(content);
+
+    // Normalize boolean-like values to Yes/No for consistency
+    Object.keys(extracted).forEach(key => {
+      const val = extracted[key];
+      if (val === true || val === 1 || val === '1' || val?.toString().toLowerCase() === 'true') {
+        extracted[key] = 'Yes';
+      } else if (val === false || val === 0 || val === '0' || val?.toString().toLowerCase() === 'false') {
+        extracted[key] = 'No';
+      }
+    });
 
     return {
       success: true,
