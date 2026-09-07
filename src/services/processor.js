@@ -48,6 +48,7 @@ async function processJob(jobId) {
     const variables = JSON.parse(job.variables_json);
     const urlColumn = job.url_column;
     const cooldown = job.cooldown_seconds || 0;
+    const apiKeyName = job.api_key_name;
 
     // Get all pending rows for this job
     const pendingRows = await all(
@@ -60,7 +61,7 @@ async function processJob(jobId) {
       const batch = pendingRows.slice(i, i + BATCH_SIZE);
 
       // Process batch with concurrency
-      await processBatch(batch, jobId, variables, urlColumn);
+      await processBatch(batch, jobId, variables, urlColumn, apiKeyName);
 
       // Cooldown between batches
       if (cooldown > 0 && i + BATCH_SIZE < pendingRows.length) {
@@ -88,15 +89,15 @@ async function processJob(jobId) {
   }
 }
 
-async function processBatch(rows, jobId, variables, urlColumn) {
+async function processBatch(rows, jobId, variables, urlColumn, apiKeyName) {
   // Process CONCURRENT_SCRAPES at a time
   for (let i = 0; i < rows.length; i += CONCURRENT_SCRAPES) {
     const chunk = rows.slice(i, i + CONCURRENT_SCRAPES);
-    await Promise.all(chunk.map(row => processRow(row, jobId, variables, urlColumn)));
+    await Promise.all(chunk.map(row => processRow(row, jobId, variables, urlColumn, apiKeyName)));
   }
 }
 
-async function processRow(row, jobId, variables, urlColumn) {
+async function processRow(row, jobId, variables, urlColumn, apiKeyName) {
   try {
     const inputData = JSON.parse(row.input_json);
     const url = inputData[urlColumn];
@@ -141,7 +142,7 @@ async function processRow(row, jobId, variables, urlColumn) {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         jobId,
-        (await get('SELECT api_key_name FROM jobs WHERE id = ?', [jobId])).api_key_name,
+        apiKeyName,
         'deepseek',
         'extraction',
         row.row_index,
